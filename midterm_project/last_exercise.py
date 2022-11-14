@@ -73,9 +73,9 @@ parser.add_argument('-s', '--seed', metavar="", default= 1234, type= int, help='
 # For the percentages of train and test, we create a mutually exclusive group. This because both percentages are related.
 group = parser.add_mutually_exclusive_group()
 group.add_argument('-ptr', '--percentageTrain', default= 0.7, type= float, 
-                   help='Percentage of train data from the data set. Default value is provided')
-group.add_argument('-pte', '--percentageTest', default= 0.3, type= float, 
-                   help='Percentage of test data from the data set. Default value is provided')
+                   help='Percentage of train data from the data set. Default value is provided. Set either percentage of train data or percentage of test data')
+group.add_argument('-pte', '--percentageTest', type= float, 
+                   help='Percentage of test data from the data set. Set either percentage of train data or percentage of test data')
 
 # We add an argument with choices for the covariates (model). Thus, the user can pick from several models provided.
 parser.add_argument('-m', '--model', default="y ~ b0 + b1*x1", type= str, 
@@ -106,8 +106,11 @@ dataTest = DataSet(x, y, horizontal_x = False, scale = False)
 # add intercept
 dataTest.add_constant()
 # Create a train and test set using the seed value and train/test split from argparse
-dataTest.train_test(trainSize = args.percentageTrain, randomSeed = args.seed)
-
+if args.percentageTest == None:
+    dataTest.train_test(trainSize = args.percentageTrain, randomSeed = args.seed)
+else:
+    dataTest.train_test(trainSize = 1-args.percentageTest, randomSeed = args.seed)
+    
 # Define and fit model parameters for the model specified by the user using argparse
 logRegression_1 = LogisticRegression(dataTest.x_tr, dataTest.y_tr, horizontal_x = True)
 logRegression_1.linearModel(args.model)
